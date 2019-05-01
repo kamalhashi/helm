@@ -37,7 +37,7 @@ infrastructure:
     type: NodePort
     image:
       repository: cargosecurityregistry.azurecr.io/cs-webapp-image
-      tag: 0.0.19
+      tag: 0.0.22
       imagePullPolicy: Always
 
 
@@ -65,10 +65,10 @@ zipkin:
     imagePullPolicy: IfNotPresent
 
 imageCredentials:
-  name: xxxxx
-  registry: xxx
-  username: xxx
-  password: xxx
+  name: acr-auth
+  registry: cargosecurityregistry.azurecr.io
+  username: cargosecurityregistry
+  password: whyVSAsX1RLapaJFkJ7+DRXZCswpBcr=
 
 
 resources: {}

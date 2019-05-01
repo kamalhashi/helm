@@ -18,7 +18,3 @@ spec:
           backend:
             serviceName: cs-frontend-service
             servicePort: 80
-        - path: /cs-zuul-service
-          backend:
-            serviceName: cs-zuul-service
-            servicePort: 8762
