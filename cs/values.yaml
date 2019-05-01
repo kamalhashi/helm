@@ -1,0 +1,90 @@
+replicaCount: 1
+
+applications:
+  authservice:
+    name: auth
+    replicas: 1
+    port: 9100
+    type: ClusterIP
+    image:
+      repository: cargosecurityregistry.azurecr.io/cs-auth-image
+      tag: latest
+      imagePullPolicy: Always
+
+infrastructure:
+  eurekaservice:
+    name: eureka
+    replicas: 1
+    port: 8761
+    type: NodePort
+    image:
+      repository: cargosecurityregistry.azurecr.io/cs-registry-image
+      tag: latest
+      imagePullPolicy: Always
+  zuulservice:
+    name: zuul
+    replicas: 1
+    port: 8762
+    type: NodePort
+    image:
+      repository: cargosecurityregistry.azurecr.io/cs-gateway-image
+      tag: 0.0.8
+      imagePullPolicy: Always
+  frontend:
+    name: frontend
+    replicas: 1
+    port: 80
+    type: NodePort
+    image:
+      repository: cargosecurityregistry.azurecr.io/cs-webapp-image
+      tag: 0.0.19
+      imagePullPolicy: Always
+
+
+ingress:
+  enabled: true
+  hosts:
+    zuul:
+      host: cs.zuul.service
+    auth:
+      host: cs.auth.service
+    frontend:
+      host: cs.frontend.service
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+zipkin:
+  enabled: true
+  image:
+    repository: openzipkin/zipkin
+    tag: latest
+    imagePullPolicy: IfNotPresent
+
+imageCredentials:
+  name: acr-auth
+  registry: cargosecurityregistry.azurecr.io
+  username: cargosecurityregistry
+  password: whyVSAsX1RLapaJFkJ7+DRXZCswpBcr=
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

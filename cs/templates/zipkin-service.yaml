@@ -1,0 +1,22 @@
+{{- if .Values.zipkin.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "cs.fullname" $ }}-zipkin-deployment
+  labels:
+    component: zipkin
+    app: {{ template "cs.name" . }}
+    chart: {{ template "cs.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: NodePort
+  selector:
+    component: zipkin
+    app: {{ template "cs.name" . }}
+    release: {{ .Release.Name }}
+  ports:
+    - port: 9411
+      targetPort: 9411
+
+{{- end }}

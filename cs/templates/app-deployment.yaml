@@ -1,0 +1,40 @@
+{{range .Values.applications }}
+apiVersion: apps/v1 # for versions before 1.8.0 use apps/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "cs.name" $ }}-{{ .name }}-deployment"
+  labels:
+    component: {{ .name }}
+    app: {{ template "cs.name" $ }}
+    chart: {{ template "cs.chart" $ }}
+    instance: {{ $.Release.Name }}
+    managed-by: {{ $.Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      component: {{ .name }}
+      app: {{ template "cs.name" $ }}
+      instance: {{ $.Release.Name }}
+  replicas: {{ .replicas | default "1" }}
+  template:
+    metadata:
+      labels:
+        component: {{ .name  }}
+        app : {{ template "cs.name" $ }}
+        instance: {{ $.Release.Name }}
+    spec:
+      containers:
+      - env:
+        - name: EUREKA_SERVICE
+          value: http://{{ template "cs.name" $ }}-eureka-service:8761/eureka
+        name: auth
+        image: "{{ .image.repository }}:{{ .image.tag}}"
+        imagePullPolicy: {{ .image.imagePullPolicy}}
+        ports:
+        - containerPort: {{ .port}}
+        resources:
+        {{ toYaml $.Values.resources | indent 10 }}
+      imagePullSecrets:
+        - name: {{ $.Values.imageCredentials.name }}
+---
+{{- end }}

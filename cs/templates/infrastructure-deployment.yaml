@@ -1,0 +1,44 @@
+{{range .Values.infrastructure }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  "{{ template "cs.name" $ }}-{{ .name }}-deployment"
+  labels:
+    component: {{ .name }}
+    app: {{ template "cs.name" $ }}
+    chart: {{ template "cs.chart" $ }}
+    instance: {{ $.Release.Name }}
+    managed-by: {{ $.Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      component: {{ .name }}
+      app: {{ template "cs.name" $ }}
+      instance: {{ $.Release.Name }}
+  replicas: {{ .replicas }}
+  template:
+    metadata:
+      labels:
+        component: {{ .name  }}
+        app: {{ template "cs.name" $ }}
+        instance: {{ $.Release.Name }}
+    spec:
+      containers:
+        - env:
+            - name: EUREKA_SERVICE
+              value: http://{{ template "cs.name" $ }}-eureka-service:8761/eureka
+            - name: AUTH_SERVICE
+              value: http://{{ template "cs.name" $ }}-auth-service:9100
+            - name: ZIPKIN_HOST
+              value: http://{{ template "cs.name" $ }}-zipkin-service:9411/
+          name: {{ .name  }}
+          image: "{{ .image.repository }}:{{ .image.tag  | default "latest" }}"
+          imagePullPolicy: {{ .image.imagePullPolicy  | default "Always" }}
+          ports:
+            - containerPort: {{ .port }}
+          resources:
+            {{ toYaml $.Values.resources | indent 10 }}
+      imagePullSecrets:
+        - name: {{ $.Values.imageCredentials.name }}
+---
+        {{- end }}

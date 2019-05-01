@@ -1,0 +1,23 @@
+{{range .Values.applications }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "cs.name" $ }}-{{ .name }}-service"
+  labels:
+    component: {{ .name }}
+    app: {{ template "cs.name" $ }}
+    chart: {{ template "cs.chart" $ }}
+    instance: {{ $.Release.Name }}
+    managed-by: {{ $.Release.Service }}
+spec:
+  type: {{ .type }}
+  ports:
+    - port: {{ .port }}
+      targetPort: {{ .port }}
+      protocol: TCP
+  selector:
+    component: {{ .name }}
+    app: {{ template "cs.name" $ }}
+---
+{{- end }}
+

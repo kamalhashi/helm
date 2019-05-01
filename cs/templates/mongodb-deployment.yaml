@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  labels:
+    name: {{ include "cs.name" . }}
+    chart: {{ include "cs.chart" . }}
+    instance: {{ .Release.Name }}
+    managed-by: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ include "cs.name" . }}
+      instance: {{ .Release.Name }}
+      role: mongo
+      environment: qa
+  serviceName: "mongo"
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        name: {{ include "cs.name" . }}
+        instance: {{ .Release.Name }}
+        role: mongo
+        environment: qa
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: mongo
+          command:
+            - mongod
+            - "--replSet"
+            - rs0
+            - "--bind_ip"
+            - 0.0.0.0
+            - "--smallfiles"
+            - "--noprealloc"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+        - name: mongo-sidecar
+          image: cvallance/mongo-k8s-sidecar
+          env:
+            - name: MONGO_SIDECAR_POD_LABELS
+              value: "role=mongo,environment=qa"
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-storage
+        annotations:
+          volume.beta.kubernetes.io/storage-class: "azure-storage-class"
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi

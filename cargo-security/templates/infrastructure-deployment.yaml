@@ -1,0 +1,40 @@
+{{range .Values.infrastructure }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name:  "{{ template "cargo-security.name" $ }}-{{ .name }}-deployment"
+    labels:
+        component: {{ .name }}
+        app: {{ template "cargo-security.name" $ }}
+        chart: {{ template "cargo-security.chart" $ }}
+        instance: {{ $.Release.Name }}
+        managed-by: {{ $.Release.Service }}
+spec:
+    selector:
+        matchLabels:
+            component: {{ .name }}
+            instance: {{ $.Release.Name }}
+    replicas: {{ .replicas }}
+    template:
+        metadata:
+            labels:
+                component: {{ .name  }}
+                instance: {{ $.Release.Name }}
+        spec:
+            containers:
+                - env:
+                      - name: EUREKA_SERVICE
+                        value: http://{{ template "cargo-security.name" $ }}-eureka-service:8761/eureka
+                      - name: ZIPKIN_HOST
+                        value: http://{{ template "cargo-security.name" $ }}-zipkin-service:9411/
+                  name: {{ $.Chart.Name  }}
+                  image: "{{ .image.repository }}:{{ .image.tag  | default "latest" }}"
+                  imagePullPolicy: {{ .image.imagePullPolicy  | default "Always" }}
+                  ports:
+                      - containerPort: {{ .port }}
+                  resources:
+                  {{ toYaml $.Values.resources | indent 10 }}
+            imagePullSecrets:
+                - name: {{ $.Values.imageCredentials.name }}
+---
+ {{- end }}
