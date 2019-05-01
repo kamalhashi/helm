@@ -65,10 +65,10 @@ zipkin:
     imagePullPolicy: IfNotPresent
 
 imageCredentials:
-  name: acr-auth
-  registry: cargosecurityregistry.azurecr.io
-  username: cargosecurityregistry
-  password: whyVSAsX1RLapaJFkJ7+DRXZCswpBcr=
+  name: xxxxx
+  registry: xxx
+  username: xxx
+  password: xxx
 
 
 resources: {}
